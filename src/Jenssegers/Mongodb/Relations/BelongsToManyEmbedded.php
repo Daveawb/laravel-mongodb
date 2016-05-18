@@ -805,14 +805,18 @@ class BelongsToManyEmbedded extends BelongsToMany
         }
 
         if ($id instanceof Collection) {
-            $id = $id->modelKeys();
+            $id = $id->getKeys();
         }
 
-        $query = $this->newPivotStatement();
+        $query = $this->newRelatedQuery();
 
-        dd($this->createAttachRecords((array) $id, $attributes));
+        $query->whereIn($this->related->getKeyName(), (array) $id);
 
-        $query->insert($this->createAttachRecords((array) $id, $attributes));
+        // Attach the new parent id to the related model.
+        $query->push($this->foreignKey, $this->createAttachRecords([$this->parent->getKey()], $attributes), true);
+
+        // Attach the new ids to the parent model.
+        $this->parent->push($this->otherKey, $this->createAttachRecords((array) $id, $attributes), true);
 
         if ($touch) {
             $this->touchIfTouching();
@@ -874,6 +878,9 @@ class BelongsToManyEmbedded extends BelongsToMany
      */
     protected function getAttachId($key, $value, array $attributes)
     {
+        // We assign any extra data to a data key
+        $attributes = ['pivot' => $attributes];
+
         if (is_array($value)) {
             return [$key, array_merge($value, $attributes)];
         }
@@ -890,9 +897,7 @@ class BelongsToManyEmbedded extends BelongsToMany
      */
     protected function createAttachRecord($id, $timed)
     {
-        $record[$this->foreignKey] = $this->parent->getKey();
-
-        $record[$this->otherKey] = $id;
+        $record[$this->related->getKeyName()] = $id;
 
         // If the record needs to have creation and update timestamps, we will make
         // them by calling the parent model's "freshTimestamp" method which will
@@ -1013,6 +1018,17 @@ class BelongsToManyEmbedded extends BelongsToMany
 
         return $query->where($this->foreignKey, $this->parent->getKey());
     }
+
+    /**
+     * Create a new query builder for the related model.
+     *
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function newRelatedQuery()
+    {
+        return $this->related->newQuery();
+    }
+
 
     /**
      * Get a new plain query builder for the pivot table.
