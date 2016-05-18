@@ -1,0 +1,40 @@
+version: '2'
+services:
+
+  php:
+    image: mongodbext:latest
+    container_name: lphp
+    volumes:
+     - ./:/var/www/html:rw
+    expose:
+     - 9000
+     - 8000
+    networks:
+     - private
+
+  mongo:
+    image: mongo:3.1
+    container_name: lmongo
+    volumes:
+     - /var/lib/lmongo:/data/db
+    networks:
+     - private
+
+  mysql:
+    image: mariadb:latest
+    container_name: lmysql
+    volumes:
+     - /var/lib/lmongo-mariadb:/var/lib/mysql
+    environment:
+     - MYSQL_USER=docker
+     - MYSQL_PASSWORD=secret
+     - MYSQL_ROOT_PASSWORD=secret
+     - MYSQL_DATABASE=unittest
+    networks:
+      - private
+
+networks:
+  private:
+    driver: bridge
+  public:
+    driver: bridge

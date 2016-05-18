@@ -11,7 +11,7 @@ class SeederTest extends TestCase
     public function testSeed()
     {
         $seeder = new UserTableSeeder;
-        $seeder->run();
+        $seeder->run(); 
 
         $user = User::where('name', 'John Doe')->first();
         $this->assertTrue($user->seed);

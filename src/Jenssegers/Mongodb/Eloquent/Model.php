@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Arr;
 use Jenssegers\Mongodb\Query\Builder as QueryBuilder;
 use Jenssegers\Mongodb\Relations\EmbedsMany;
 use Jenssegers\Mongodb\Relations\EmbedsOne;
@@ -37,6 +38,13 @@ abstract class Model extends BaseModel
      * @var Relation
      */
     protected $parentRelation;
+
+    /**
+     * The many to many relationship methods.
+     *
+     * @var array
+     */
+    public static $manyMethods = ['belongsToMany', 'belongsToManyEmbedded', 'morphToMany', 'morphedByMany'];
 
     /**
      * Custom accessor for the model's id.
@@ -523,6 +531,24 @@ abstract class Model extends BaseModel
         $connection = $this->getConnection();
 
         return new QueryBuilder($connection, $connection->getPostProcessor());
+    }
+
+    /**
+     * Get the relationship name of the belongs to many.
+     *
+     * @return string
+     */
+    protected function getBelongsToManyCaller()
+    {
+        $self = __FUNCTION__;
+
+        $caller = Arr::first(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), function ($key, $trace) use ($self) {
+            $caller = $trace['function'];
+
+            return ! in_array($caller, Model::$manyMethods) && $caller != $self;
+        });
+
+        return ! is_null($caller) ? $caller['function'] : null;
     }
 
     /**

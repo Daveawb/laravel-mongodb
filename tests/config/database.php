@@ -7,16 +7,17 @@ return [
         'mongodb' => [
             'name'       => 'mongodb',
             'driver'     => 'mongodb',
-            'host'       => '127.0.0.1',
+            'host'       => 'lmongo',
             'database'   => 'unittest',
         ],
 
         'mysql' => [
             'driver'    => 'mysql',
-            'host'      => '127.0.0.1',
+            'host'      => 'lmysql',
+            'port'      => 3306,
             'database'  => 'unittest',
-            'username'  => 'travis',
-            'password'  => '',
+            'username'  => 'docker',
+            'password'  => 'secret',
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',

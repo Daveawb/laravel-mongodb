@@ -62,6 +62,11 @@ class User extends Eloquent implements AuthenticatableContract, CanResetPassword
     {
         return $this->embedsOne('User');
     }
+    
+    public function connections()
+    {
+        return $this->belongsToManyEmbedded('User');
+    }
 
     protected function getDateFormat()
     {
